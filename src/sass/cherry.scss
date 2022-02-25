@@ -177,7 +177,6 @@
   box-sizing: border-box;
   z-index: 1;
   user-select: none;
-  box-shadow: $toolbarShadowLight;
   background: $toolbarBgLight;
 
   [data-toolbar-theme='dark'] & {
