@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cherry Markdown Integration</title>
+        <link rel="stylesheet" href="../dist/cherry-markdown.min.css" />
+
+    </head>
+    <body>
+        <div id="markdown-container"></div>
+        <div>
+            <div><button onclick="getMarkdown()">获取markdown</button></div>
+            <div><button onclick="getHtml()">获取html</button></div>
+            <div><button onclick="render()">渲染html内容</button></div>
+        </div>
+        <div>渲染区域</div>
+        <div id="upupor_render"></div>
+        <script src="../dist/cherry-markdown.min.js"></script>
+        <script>
+            window.editor = new Cherry({
+            id: 'markdown-container',
+            value: '# welcome to cherry editor!',
+            editor: {
+                theme: 'default',
+                height: '',
+                defaultModel: '',
+            },
+            toolbars:{
+                theme: 'light', // light or dark                                                                            
+                toolbar : ['bold', 'italic', 'strikethrough', '|', 'header', 'list', 'insert', 'graph', 'switchModel'],   
+                bubble : ['bold', 'italic', 'strikethrough', 'sub', 'sup', '|', 'size'], // array or false                 
+                float : ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'quickTable', 'code'], // array or false         
+                customMenu: {
+                }
+            }
+            });
+        </script>
+        <script>
+            function getMarkdown(){
+                console.log(window.editor.getMarkdown());
+            }
+
+            function getHtml(){
+                console.log(window.editor.getHtml());
+            }
+            function render(){
+                document.getElementById("upupor_render").insertAdjacentHTML('afterend', window.editor.getHtml());
+            }
+        </script>
+    </body>
+</html>
