@@ -1,5 +1,5 @@
 import List from '../../../src/core/hooks/List';
-import * as md5 from 'md5';
+import md5 from 'md5';
 
 const cases = []
 cases[0] = `
@@ -72,7 +72,8 @@ Object.defineProperty(listHook, '$engine', {
 describe('core/hooks/list', () => {
   it('list hook', () => {
     cases.forEach((item) => {
-      expect(listHook.toHtml(item, (text) => ({ html: text }))).toMatchSnapshot();
+      listHook.makeHtml(item, (text) => ({ html: text }));
+      expect(listHook.cache[listHook.sign].content).toMatchSnapshot();
     });
   });
 });
