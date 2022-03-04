@@ -1671,7 +1671,6 @@ green     #859900
   box-sizing: border-box;
   z-index: 1;
   user-select: none;
-  box-shadow: 0 0 10px rgba(128, 145, 165, 0.2);
   background: white; }
   [data-toolbar-theme='dark'] .cherry-toolbar {
     background: #20304b;
