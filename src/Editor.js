@@ -64,7 +64,7 @@ export default class Editor {
         mode: 'markdown',
         lineWrapping: true, // 自动换行
         indentWithTabs: true, // 缩进用tab表示
-        autofocus: true,
+        autofocus: false,
         theme: 'default',
         autoCloseTags: true, // 输入html标签时自动补充闭合标签
         extraKeys: { Enter: 'newlineAndIndentContinueMarkdownList' }, // 增加markdown回车自动补全
