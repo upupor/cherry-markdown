@@ -181,7 +181,7 @@ const defaultConfig = {
       'settings',
     ],
     sidebar: [],
-    bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', '|', 'size', 'color'], // array or false
+    bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'quickTable', 'code'], // array or false
   },
   fileUpload: callbacks.fileUpload,
@@ -193,6 +193,8 @@ const defaultConfig = {
   previewer: {
     dom: false,
     className: 'cherry-markdown',
+    // 是否启用预览区域编辑能力（目前支持编辑图片尺寸、编辑表格内容）
+    enablePreviewerBubble: true,
   },
   // 预览页面不需要绑定事件
   isPreviewOnly: false,
