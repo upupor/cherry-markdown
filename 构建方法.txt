@@ -9,3 +9,10 @@ Step 2: Merge the changes and update on GitHub.
 git checkout main
 git merge --no-ff Tencent-main
 git push origin main
+
+
+构建生产包
+先把dist目录删除
+rm -rf dist/
+在执行构建命令
+npm run build
