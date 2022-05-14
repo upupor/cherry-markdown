@@ -30,7 +30,7 @@ function attrsToAttributeString(object) {
 }
 
 export function makeChecklist(text) {
-  return text.replace(/([*+-]\s+)\[(\s|x)\]/g, (whole, pre, test) => {
+  return text.replace(/^((?:|[\t ]+)[*+-]\s+)\[(\s|x)\]/gm, (whole, pre, test) => {
     const checkHtml = /\s/.test(test)
       ? '<span class="ch-icon ch-icon-square"></span>'
       : '<span class="ch-icon ch-icon-check"></span>';
@@ -71,7 +71,7 @@ function getListStyle(m2) {
 
 // 标识符处理
 function handleMark(str, node) {
-  const listRegex = /^((([*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]+?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
+  const listRegex = /^((([*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)([^\r]*?)($|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.]|[a-z]\.|[I一二三四五六七八九十]+\.)[ \t]+)))/;
   if (!listRegex.test(str)) {
     node.type = 'blank';
     return str;
@@ -173,7 +173,7 @@ export default class List extends ParagraphBase {
       const child = this.tree[item];
       const itemAttr = {};
       const str = `<p>${child.strs.join('<br>')}</p>`;
-      child.lines += child.strs.length;
+      child.lines += this.getLineCount(child.strs.join('\n'));
       const children = child.children.length ? this.renderTree(item) : '';
       node.lines += child.lines;
       lines += child.lines;
