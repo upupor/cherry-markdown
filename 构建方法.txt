@@ -1,0 +1,11 @@
+命令合并官方分支
+Step 1: From your project repository, check out a new branch and test the changes.
+
+git checkout -b Tencent-main main
+git pull https://github.com/Tencent/cherry-markdown.git main
+
+Step 2: Merge the changes and update on GitHub.
+
+git checkout main
+git merge --no-ff Tencent-main
+git push origin main
