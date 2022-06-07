@@ -178,6 +178,7 @@
   z-index: 1;
   user-select: none;
   background: $toolbarBgLight;
+  overflow: hidden;
 
   [data-toolbar-theme='dark'] & {
     background: $toolbarBgDark;
