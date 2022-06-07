@@ -66,9 +66,17 @@ export default class Cherry extends CherryStatic {
       this.options.engine.global.urlProcessor = urlProcessorProxy(this.options.engine.global.urlProcessor);
     }
 
+    this.status = {
+      toolbar: 'show',
+      previewer: 'show',
+      editor: 'show',
+    };
+
     if (this.options.isPreviewOnly) {
       this.options.toolbars.showToolbar = false;
       this.options.editor.defaultModel = 'previewOnly';
+      this.status.editor = 'hide';
+      this.status.toolbar = 'hide';
     }
 
     /**
@@ -91,12 +99,6 @@ export default class Cherry extends CherryStatic {
    * @private
    */
   init() {
-    this.status = {
-      toolbar: 'show',
-      previewer: 'show',
-      editor: 'show',
-    };
-
     let mountEl = this.options.id ? document.getElementById(this.options.id) : this.options.el;
 
     if (!mountEl) {
@@ -554,6 +556,8 @@ export default class Cherry extends CherryStatic {
         if (this.options.callback.afterChange) {
           this.options.callback.afterChange(markdownText, html);
         }
+        // 强制每次编辑（包括undo、redo）编辑器都会自动滚动到光标位置
+        codemirror.scrollIntoView(null);
       }, 50);
     } catch (e) {
       throw new NestedError(e);
