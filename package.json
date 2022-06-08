@@ -27,7 +27,7 @@
   "scripts": {
     "iconfont": "gulp",
     "dev": "cross-env NODE_ENV=development rollup -w --config build/dev.js",
-    "build": "run-s clean build:all build:cjs",
+    "build": "run-s clean  build:all build:cjs",
     "build:all": "run-p iconfont build:types build:addons build:full build:debug build:core build:engine",
     "build:cjs": "run-p build:core-cjs build:engine-cjs",
     "build:full": "cross-env NODE_ENV=production rollup --config build/build.js",
@@ -102,8 +102,8 @@
     "gulp-iconfont": "^11.0.0",
     "gulp-rename": "^2.0.0",
     "jest": "^27.5.1",
-    "node-sass": "^7.0.0",
     "jest-diff": "^27.5.1",
+    "node-sass": "^7.0.0",
     "npm-run-all": "^4.1.5",
     "prettier": "2.6.2",
     "rimraf": "^3.0.2",
