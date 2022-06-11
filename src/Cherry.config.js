@@ -170,7 +170,7 @@ const defaultConfig = {
     convertWhenPaste: true,
     codemirror: {
       // 是否自动focus 默认为true
-      autofocus: true,
+      autofocus: false,
     },
   },
   toolbars: {
