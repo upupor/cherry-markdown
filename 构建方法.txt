@@ -1,4 +1,9 @@
-命令合并官方分支
+## 构建生产包优先使用yarn
+yarn install
+yarn build
+
+
+### 命令合并官方分支
 Step 1: From your project repository, check out a new branch and test the changes.
 
 git checkout -b Tencent-main main
@@ -11,7 +16,7 @@ git merge --no-ff Tencent-main
 git push origin main
 
 
-构建生产包
+### (过时)构建生产包
 先把dist目录删除
 rm -rf dist/
 在执行构建命令
