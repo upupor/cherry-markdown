@@ -18,9 +18,18 @@ import MenuBase from '@/toolbars/MenuBase';
  * 插入斜体的按钮
  */
 export default class Italic extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('italic', 'italic');
+  }
+
+  /**
+   * 是不是包含加粗语法
+   * @param {String} selection
+   * @returns {Boolean}
+   */
+  $testIsItalic(selection) {
+    return /^\s*(\*|_)[\s\S]+(\1)/.test(selection);
   }
 
   /**
@@ -30,12 +39,25 @@ export default class Italic extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
-    if (/^\s*(\*|_)[\s\S]+(\1)/.test(selection)) {
-      return selection.replace(/(^)(\s*)(\*|_)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
+    let $selection = this.getSelection(selection) || '斜体';
+    // 如果是单选，并且选中内容的开始结束内没有加粗语法，则扩大选中范围
+    if (!this.isSelections && !this.$testIsItalic($selection)) {
+      this.getMoreSelection('*', '*', () => {
+        const newSelection = this.editor.editor.getSelection();
+        const isItalic = this.$testIsItalic(newSelection);
+        if (isItalic) {
+          $selection = newSelection;
+        }
+        return isItalic;
+      });
     }
-    let $selection = selection ? selection : '斜体';
-    $selection = $selection.replace(/(^)([^\n]+)($)/gm, '$1 *$2* $3');
-    return $selection;
+    if (this.$testIsItalic($selection)) {
+      return $selection.replace(/(^)(\s*)(\*|_)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
+    }
+    this.registerAfterClickCb(() => {
+      this.setLessSelection('*', '*');
+    });
+    return $selection.replace(/(^)([^\n]+)($)/gm, '$1*$2*$3');
   }
 
   /**
@@ -43,6 +65,6 @@ export default class Italic extends MenuBase {
    * 在windows下是Ctrl+i，在mac下是cmd+i
    */
   get shortcutKeys() {
-    return ['Mod-i'];
+    return ['Ctrl-i'];
   }
 }

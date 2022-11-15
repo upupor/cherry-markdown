@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import locale from '@/utils/locale';
+import locale from '@/locales/index';
 import Event from '@/Event';
+import { saveIsClassicBrToLocal, getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 
 /**
  * 设置按钮
@@ -23,25 +24,33 @@ import Event from '@/Event';
 export default class Settings extends MenuBase {
   /**
    * TODO: 需要优化参数传入方式
-   * @param {Object} editor 编辑器实例
-   * @param {Object} engine 引擎实例
    */
-  constructor(editor, engine) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('settings', 'settings');
-    this.engine = engine;
-    const { classicBr } = this.engine.$cherry.options.engine.global;
-    const { defaultModel } = editor.options;
+    this.updateMarkdown = false;
+    this.engine = $cherry.engine;
+    const classicBr = testKeyInLocal('classicBr')
+      ? getIsClassicBrFromLocal()
+      : this.engine.$cherry.options.engine.global?.classicBr;
+    const { defaultModel } = $cherry.editor.options;
     const classicBrIconName = classicBr ? 'br' : 'normal';
     const classicBrName = classicBr ? 'classicBr' : 'normalBr';
     const previewIcon = defaultModel === 'editOnly' ? 'preview' : 'previewClose';
     const previewName = defaultModel === 'editOnly' ? 'togglePreview' : 'previewClose';
-    this.instanceId = engine.$cherry.previewer.instanceId;
+    this.instanceId = $cherry.instanceId;
     this.subMenuConfig = [
       { iconName: classicBrIconName, name: classicBrName, onclick: this.bindSubClick.bind(this, 'classicBr') },
       { iconName: previewIcon, name: previewName, onclick: this.bindSubClick.bind(this, 'previewClose') },
+      { iconName: '', name: '隐藏(ctrl+0)', onclick: this.bindSubClick.bind(this, 'toggleToolbar') },
     ];
     this.attachEventListeners();
+    this.shortcutKeyMaps = [
+      {
+        shortKey: 'toggleToolbar',
+        shortcutKey: 'Ctrl-0',
+      },
+    ];
   }
 
   /**
@@ -116,28 +125,24 @@ export default class Settings extends MenuBase {
    * @returns
    */
   onClick(selection, shortKey = '', callback) {
+    // eslint-disable-next-line no-param-reassign
+    shortKey = this.matchShortcutKey(shortKey);
     if (shortKey === 'classicBr') {
-      const [dom] = Array.from(this.subMenu.dom.children);
-      if (dom.childNodes[1].textContent === locale.zh_CN.classicBr) {
-        dom.children[0].setAttribute(
-          'class',
-          dom.children[0].getAttribute('class').replace('ch-icon-br', 'ch-icon-normal'),
-        );
-        this.engine.$cherry.options.engine.global.classicBr = false;
-        this.engine.hookCenter.hookList.paragraph.forEach((item) => {
-          item.classicBr = false;
-        });
-        dom.childNodes[1].textContent = locale.zh_CN.normalBr;
+      const targetIsClassicBr = !getIsClassicBrFromLocal();
+      saveIsClassicBrToLocal(targetIsClassicBr);
+      this.engine.$cherry.options.engine.global.classicBr = targetIsClassicBr;
+      this.engine.hookCenter.hookList.paragraph.forEach((item) => {
+        item.classicBr = targetIsClassicBr;
+      });
+
+      let i = this.$cherry.wrapperDom.querySelector('.cherry-dropdown .ch-icon-normal');
+      i = i ? i : this.$cherry.wrapperDom.querySelector('.cherry-dropdown .ch-icon-br');
+      if (targetIsClassicBr) {
+        i.classList.replace('ch-icon-normal', 'ch-icon-br');
+        i.parentElement.childNodes[1].textContent = locale.zh_CN.classicBr;
       } else {
-        dom.children[0].setAttribute(
-          'class',
-          dom.children[0].getAttribute('class').replace('ch-icon-normal', 'ch-icon-br'),
-        );
-        this.engine.$cherry.options.engine.global.classicBr = true;
-        this.engine.hookCenter.hookList.paragraph.forEach((item) => {
-          item.classicBr = true;
-        });
-        dom.childNodes[1].textContent = locale.zh_CN.classicBr;
+        i.classList.replace('ch-icon-br', 'ch-icon-normal');
+        i.parentElement.childNodes[1].textContent = locale.zh_CN.normalBr;
       }
       this.engine.$cherry.previewer.update('');
       this.engine.$cherry.initText(this.engine.$cherry.editor.editor);
@@ -147,7 +152,44 @@ export default class Settings extends MenuBase {
       } else {
         this.editor.previewer.editOnly(true);
       }
+    } else if (shortKey === 'toggleToolbar') {
+      this.toggleToolbar();
     }
     return selection;
+  }
+
+  /**
+   * 解析快捷键
+   * @param {string} shortcutKey 快捷键
+   * @returns
+   */
+  matchShortcutKey(shortcutKey) {
+    const shortcutKeyMap = this.shortcutKeyMaps.find((item) => {
+      return item.shortcutKey === shortcutKey;
+    });
+    return shortcutKeyMap !== undefined ? shortcutKeyMap.shortKey : shortcutKey;
+  }
+
+  /**
+   * 切换Toolbar显示状态
+   */
+  toggleToolbar() {
+    const { wrapperDom } = this.engine.$cherry;
+    if (wrapperDom instanceof HTMLDivElement) {
+      const toolbarInstanceId = this.engine.$cherry.toolbar.instanceId;
+      if (wrapperDom.className.indexOf('cherry--no-toolbar') > -1) {
+        wrapperDom.classList.remove('cherry--no-toolbar');
+        Event.emit(toolbarInstanceId, Event.Events.toolbarShow);
+      } else {
+        wrapperDom.classList.add('cherry--no-toolbar');
+        Event.emit(toolbarInstanceId, Event.Events.toolbarHide);
+      }
+    }
+  }
+
+  get shortcutKeys() {
+    return this.shortcutKeyMaps.map((item) => {
+      return item.shortcutKey;
+    });
   }
 }

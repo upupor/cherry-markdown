@@ -21,13 +21,14 @@ const imgSizeHander = {
   getImgPosition() {
     const position = this.img.getBoundingClientRect();
     const editorPosition = this.previewerDom.parentNode.getBoundingClientRect();
+    const padding = parseFloat(this.img.style.padding) || 0;
     return {
       bottom: position.bottom - editorPosition.bottom,
-      top: position.top - editorPosition.top,
+      top: position.top - editorPosition.top + padding * 1.5,
       height: position.height,
       width: position.width,
       right: position.right - editorPosition.right,
-      left: position.left - editorPosition.left,
+      left: position.left - editorPosition.left + padding * 1.5,
       x: position.x - editorPosition.x,
       y: position.y - editorPosition.y,
     };
@@ -111,7 +112,7 @@ const imgSizeHander = {
     this.butsImg = document.createElement('div');
     this.butsImg.className = 'cherry-previewer-img-size-hander__background';
     this.butsImg.style.backgroundImage = `url(${this.buts.imgSrc})`;
-    this.butsLayout.append(this.butsImg);
+    this.butsLayout.appendChild(this.butsImg);
 
     this.butsPoints = {};
     Object.keys(this.buts.points.arr).forEach((index) => {
@@ -122,7 +123,7 @@ const imgSizeHander = {
         `cherry-previewer-img-size-hander__points-${name}`,
       ].join(' ');
       tmp.dataset.name = name;
-      this.butsLayout.append(tmp);
+      this.butsLayout.appendChild(tmp);
       this.butsPoints[`pints-${name}`] = tmp;
     });
     return this.updateBubbleButs();
