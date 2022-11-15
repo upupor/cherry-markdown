@@ -17,6 +17,7 @@
 import imgSizeHander from '@/utils/imgSizeHander';
 import tableContentHander from '@/utils/tableContentHander';
 import Event from '@/Event';
+import { copyToClip } from '@/utils/copy';
 /**
  * 预览区域的响应式工具栏
  */
@@ -37,6 +38,7 @@ export default class PreviewerBubble {
      */
     this.editor = previewer.editor;
     this.previewerDom = this.previewer.getDom();
+    this.enablePreviewerBubble = this.previewer.options.enablePreviewerBubble;
     /**
      * @property
      * @type {{ emit: (...args: any[]) => any}}
@@ -75,17 +77,23 @@ export default class PreviewerBubble {
   }
 
   $onClick(e) {
-    // 只有双栏编辑模式才出现该功能
+    const { target } = e;
+    // 复制代码块操作不关心编辑器的状态
+    this.$dealCopyCodeBlock(e);
     const cherryStatus = this.previewer.$cherry.getStatus();
+    // 纯预览模式下，支持点击放大图片功能（以回调的形式实现，需要业务侧实现图片放大功能）
     if (cherryStatus.editor === 'hide') {
       if (cherryStatus.previewer === 'show') {
-        // 纯预览模式下，支持点击放大图片功能（以回调的形式实现，需要业务侧实现图片放大功能）
         this.previewer.$cherry.options.callback.onClickPreview &&
           this.previewer.$cherry.options.callback.onClickPreview(e);
       }
       return;
     }
-    const { target } = e;
+
+    if (!this.enablePreviewerBubble) {
+      return;
+    }
+    // 只有双栏编辑模式才出现下面的功能
     this.$removeAllPreviewerBubbles();
     if (typeof target.tagName === 'undefined') {
       return;
@@ -98,6 +106,30 @@ export default class PreviewerBubble {
       case 'TH':
         this.bubbleHandler = this.$showTablePreviewerBubbles(target);
         break;
+    }
+  }
+
+  /**
+   * 处理复制代码块的操作
+   */
+  $dealCopyCodeBlock(e) {
+    const { target } = e;
+    if (target.className === 'cherry-copy-code-block' || target.parentNode?.className === 'cherry-copy-code-block') {
+      const parentNode =
+        target.className === 'cherry-copy-code-block' ? target.parentNode : target.parentNode.parentNode;
+      const codeContent = parentNode.innerText;
+      const final = this.previewer.$cherry.options.callback.onCopyCode(e, codeContent);
+      if (final === false) {
+        return false;
+      }
+      const iconNode = parentNode.querySelector('i.ch-icon-copy');
+      if (iconNode) {
+        iconNode.className = iconNode.className.replace('copy', 'ok');
+        setTimeout(() => {
+          iconNode.className = iconNode.className.replace('ok', 'copy');
+        }, 1500);
+      }
+      copyToClip(final);
     }
   }
 
@@ -148,7 +180,6 @@ export default class PreviewerBubble {
     const testSrc = contentImgs[this.imgIndex]
       ? contentImgs[this.imgIndex].replace(/^!\[.*?\]\((.*?)\)/, '$1').trim()
       : '';
-    console.log('src', src, 'testSrc', testSrc);
     if (contentImgs.length === this.totalImgs || src === testSrc) {
       // 如果图片语法数量和预览区域的一样多
       // 暂时不需要考虑代码块和手动输入img标签的场景
@@ -162,8 +193,9 @@ export default class PreviewerBubble {
         return false;
       }
       const targetLine = targetFrom.line;
-      const imgAppendReg = /^!\[.*?#(center|right|left|float-right|float-left).*?\].*$/;
-      this.imgAppend = imgAppendReg.test(targetSearch) ? targetSearch.replace(imgAppendReg, '#$1') : false;
+      const imgAppendReg =
+        /^!\[.*?((?:#center|#right|#left|#float-right|#float-left|#border|#B|#shadow|#S|#radius|#R)+).*?\].*$/;
+      this.imgAppend = imgAppendReg.test(targetSearch) ? targetSearch.replace(imgAppendReg, '$1') : false;
       const targetChFrom = targetFrom.ch + targetSearch.replace(/^(!\[[^#\]]*).*$/, '$1').length;
       const targetChTo = targetChFrom + targetSearch.replace(/^(!\[[^#\]]*)([^\]]*?)\].*$/, '$2').length;
       this.editor.editor.setSelection({ line: targetLine, ch: targetChFrom }, { line: targetLine, ch: targetChTo });

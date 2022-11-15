@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
+import { getSelection } from '@/utils/selection';
 /**
  * 下标的按钮
  **/
 export default class Sub extends MenuBase {
-  constructor(editor) {
-    super(editor);
+  constructor($cherry) {
+    super($cherry);
     this.setName('sub', 'sub');
+  }
+
+  $testIsSub(selection) {
+    return /^\s*(\^\^)[\s\S]+(\1)/.test(selection);
   }
 
   /**
@@ -30,13 +35,24 @@ export default class Sub extends MenuBase {
    * @returns {string} 回填到编辑器光标位置/选中文本区域的内容
    */
   onClick(selection, shortKey = '') {
+    let $selection = getSelection(this.editor.editor, selection) || '下标';
     // 如果选中的内容里有下标的语法，则认为是要去掉下标语法
-    if (/^\s*(\^\^)[\s\S]+(\1)/.test(selection)) {
-      return selection.replace(/(^)(\s*)(\^\^)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
+    if (!this.isSelections && !this.$testIsSub($selection)) {
+      this.getMoreSelection('^^', '^^', () => {
+        const newSelection = this.editor.editor.getSelection();
+        const isSub = this.$testIsSub(newSelection);
+        if (isSub) {
+          $selection = newSelection;
+        }
+        return isSub;
+      });
     }
-    let $selection = selection ? selection : '下标';
-    // 反之加上下标语法
-    $selection = $selection.replace(/(^)([^\n]+)($)/gm, '$1 ^^$2^^ $3');
-    return $selection;
+    if (this.$testIsSub($selection)) {
+      return $selection.replace(/(^)(\s*)(\^\^)([^\n]+)(\3)(\s*)($)/gm, '$1$4$7');
+    }
+    this.registerAfterClickCb(() => {
+      this.setLessSelection('^^', '^^');
+    });
+    return $selection.replace(/(^)([^\n]+)($)/gm, '$1^^$2^^$3');
   }
 }
