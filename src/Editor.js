@@ -26,6 +26,10 @@ import 'codemirror/addon/edit/matchtags';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/display/placeholder';
 import 'codemirror/keymap/sublime';
+
+import 'cm-search-replace/src/search';
+import 'codemirror/addon/scroll/annotatescrollbar';
+import 'codemirror/addon/search/matchesonscrollbar';
 // import 'codemirror/addon/selection/active-line';
 // import 'codemirror/addon/edit/matchbrackets';
 import htmlParser from '@/utils/htmlparser';
@@ -171,7 +175,7 @@ export default class Editor {
         currentCursor.line = range[0].anchor.line;
         currentCursor.ch = range[0].anchor.ch;
         codemirrorDoc.replaceSelection(mdText);
-        pasteHelper.showSwitchBtnAfterPasteHtml(currentCursor, codemirror, htmlText, mdText);
+        pasteHelper.showSwitchBtnAfterPasteHtml(this.$cherry, currentCursor, codemirror, htmlText, mdText);
       } else {
         codemirrorDoc.replaceSelection(mdText);
       }
@@ -301,7 +305,7 @@ export default class Editor {
             if (fileType === '' || /^text/i.test(fileType)) {
               continue;
             }
-            this.options.fileUpload(file, (url, params) => {
+            this.options.fileUpload(file, (url, params = {}) => {
               if (typeof url !== 'string') {
                 return;
               }
