@@ -21,13 +21,22 @@ import { createElement } from '@/utils/dom';
 /**
  *
  * @param {HTMLElement} targetDom
- * @param {'absolute' | 'fixed'} [positionModel = 'absolute']
+ * @param {'absolute' | 'fixed' | 'sidebar'} [positionModel = 'absolute']
  * @returns {Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>}
  */
 function getPosition(targetDom, positionModel = 'absolute') {
   const pos = targetDom.getBoundingClientRect();
   if (positionModel === 'fixed') {
     return pos;
+  }
+  // 侧边栏按钮做个特殊处理
+  if (positionModel === 'sidebar') {
+    return {
+      left: targetDom.parentElement.offsetLeft - 130 + pos.width,
+      top: targetDom.offsetTop + pos.height / 2,
+      width: pos.width,
+      height: pos.height,
+    };
   }
   return { left: targetDom.offsetLeft, top: targetDom.offsetTop, width: pos.width, height: pos.height };
 }
@@ -65,7 +74,7 @@ export default class MenuBase {
     /**
      * 子菜单的定位方式
      * @property
-     * @type {'absolute' | 'fixed'}
+     * @type {'absolute' | 'fixed' | 'sidebar'}
      */
     this.positionModel = 'absolute';
     // eslint-disable-next-line no-underscore-dangle
@@ -245,15 +254,24 @@ export default class MenuBase {
     const cm = this.editor.editor;
     const { begin, end } = this.$getSelectionRange();
     let newBeginCh =
-      // 如果只有一个换行，则特殊处理一下
-      /^\n$/.test(appendBefore) ? 0 : begin.ch - appendBefore.length;
+      // 如果只包含换行，则起始位置一定是0
+      /\n/.test(appendBefore) ? 0 : begin.ch - appendBefore.length;
     newBeginCh = newBeginCh < 0 ? 0 : newBeginCh;
-    const newBegin = { line: begin.line, ch: newBeginCh };
-    const newEndCh =
-      cm.getLine(end.line).length < end.ch + appendAfter.length
-        ? cm.getLine(end.line).length
-        : end.ch + appendAfter.length;
-    const newEnd = { line: end.line, ch: newEndCh };
+    let newBeginLine = /\n/.test(appendBefore) ? begin.line - appendBefore.match(/\n/g).length : begin.line;
+    newBeginLine = newBeginLine < 0 ? 0 : newBeginLine;
+    const newBegin = { line: newBeginLine, ch: newBeginCh };
+    let newEndLine = end.line;
+    let newEndCh = end.ch;
+    if (/\n/.test(appendAfter)) {
+      newEndLine = end.line + appendAfter.match(/\n/g).length;
+      newEndCh = cm.getLine(newEndLine)?.length;
+    } else {
+      newEndCh =
+        cm.getLine(end.line).length < end.ch + appendAfter.length
+          ? cm.getLine(end.line).length
+          : end.ch + appendAfter.length;
+    }
+    const newEnd = { line: newEndLine, ch: newEndCh };
     cm.setSelection(newBegin, newEnd);
     if (cb() === false) {
       cm.setSelection(begin, end);
@@ -310,8 +328,11 @@ export default class MenuBase {
    * 获取当前菜单的位置
    */
   getMenuPosition() {
+    const isFromSidebar = /cherry-sidebar/.test(this.dom.parentElement.className);
     if (/cherry-bubble/.test(this.dom.parentElement.className)) {
       this.positionModel = 'fixed';
+    } else if (isFromSidebar) {
+      this.positionModel = 'sidebar';
     } else {
       this.positionModel = 'absolute';
     }

@@ -101,12 +101,12 @@
 
   h5,
   .h5 {
-    font-size: .875em;
+    font-size: 0.875em;
   }
 
   h6,
   .h6 {
-    font-size: .85em;
+    font-size: 0.85em;
   }
 
   b,
@@ -161,8 +161,25 @@
     }
   }
 
+  .link-quote {
+    color: $linkColor;
+  }
+
   a {
     color: $linkColor;
+    position: relative;
+    text-decoration: none;
+
+    &[target='_blank'] {
+      padding: 0 2px;
+
+      &::after {
+        content: '\EA10';
+        font-size: 12px;
+        font-family: 'ch-icon';
+        margin: 0 2px;
+      }
+    }
 
     &:hover {
       color: $linkHoverColor;
@@ -222,7 +239,7 @@
 
     & > pre {
       margin: 0;
-      code[class*="language-"] {
+      code[class*='language-'] {
         counter-reset: line;
         &.wrap {
           white-space: pre-wrap;
@@ -250,8 +267,8 @@
 
   /* Inline code */
   :not(pre) > code {
-    padding: .1em;
-    border-radius: .3em;
+    padding: 0.1em;
+    border-radius: 0.3em;
     white-space: normal;
     color: #f85353;
     background-color: #e5e5e5;
@@ -353,7 +370,12 @@
 
   &.head-num {
     // Auto Numbering for Headings
-    h1, h2, h3, h4, h5, h6 {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
       .anchor:before {
         width: auto;
         font-size: inherit;
@@ -365,55 +387,55 @@
     counter-reset: level1;
 
     h1 {
-      counter-reset: level2
+      counter-reset: level2;
     }
 
     h2 {
-      counter-reset: level3
+      counter-reset: level3;
     }
 
     h3 {
-      counter-reset: level4
+      counter-reset: level4;
     }
 
     h4 {
-      counter-reset: level5
+      counter-reset: level5;
     }
 
     h5 {
-      counter-reset: level6
+      counter-reset: level6;
     }
 
     h1 .anchor:before {
       counter-increment: level1;
-      content: counter(level1) ". "
+      content: counter(level1) '. ';
     }
 
     h2 .anchor:before {
       counter-increment: level2;
-      content: counter(level1) "." counter(level2) " "
+      content: counter(level1) '.' counter(level2) ' ';
     }
 
     h3 .anchor:before {
       counter-increment: level3;
-      content: counter(level1) "." counter(level2) "." counter(level3) " "
+      content: counter(level1) '.' counter(level2) '.' counter(level3) ' ';
     }
 
     h4 .anchor:before {
       counter-increment: level4;
-      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) " "
+      content: counter(level1) '.' counter(level2) '.' counter(level3) '.' counter(level4) ' ';
     }
 
-    h5 .anchor:before{
+    h5 .anchor:before {
       counter-increment: level5;
-      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) "." counter(level5) " "
+      content: counter(level1) '.' counter(level2) '.' counter(level3) '.' counter(level4) '.' counter(level5) ' ';
     }
 
     h6 .anchor:before {
       counter-increment: level6;
-      content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) "." counter(level5) "." counter(level6) " "
+      content: counter(level1) '.' counter(level2) '.' counter(level3) '.' counter(level4) '.' counter(level5) '.'
+        counter(level6) ' ';
     }
-
   }
 }
 
@@ -446,5 +468,107 @@ div[data-type='codeBlock'] {
 
   [data-code-block-theme='solarized-light'] & {
     @import 'prism/solarized-light';
+  }
+}
+
+.cherry-detail {
+  details {
+    background: #f8f9faaa;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    summary {
+      user-select: none;
+      padding: 5px 10px;
+      background-color: #6c757d;
+      color: #FFF;
+      border-radius: 8px;
+    }
+    .cherry-detail-body {
+      padding: 15px 25px 0 25px;
+    }
+  }
+}
+
+.cherry-detail__multiple {
+  border-radius: 8px;
+  overflow: hidden;
+  details {
+    margin-bottom: 1px;
+    border-radius: 0;
+    border: none;
+    summary {
+      border-radius: 0;
+    }
+  }
+}
+
+.cherry-panel {
+  margin: 10px 0;
+  overflow: hidden;
+  border-radius: 8px;
+  box-sizing: border-box;
+  border: 0.5px solid;
+  .cherry-panel--title {
+    color: #fff;
+    padding: 5px 20px;
+    &.cherry-panel--title__not-empty::before {
+      font-family: 'ch-icon';
+      margin: 0 12px 0 -6px;
+      vertical-align: bottom;
+    }
+  }
+  .cherry-panel--body {
+    padding: 5px 20px;
+  }
+}
+.cherry-panel__primary {
+  background-color: #cfe2ff;
+  color: #0a58ca;
+  .cherry-panel--title {
+    background-color: #0d6dfe;
+    &.cherry-panel--title__not-empty::before {
+      content: '\EA6A';
+    }
+  }
+}
+.cherry-panel__info {
+  background-color: #cff4fc;
+  color: #087990;
+  .cherry-panel--title {
+    background-color: #099cba;
+    &.cherry-panel--title__not-empty::before {
+      content: '\EA69';
+    }
+  }
+}
+.cherry-panel__warning {
+  background-color: #fff3cd;
+  color: #997404;
+  .cherry-panel--title {
+    background-color: #b38806;
+    &.cherry-panel--title__not-empty::before {
+      content: '\EA6B';
+    }
+  }
+}
+.cherry-panel__danger {
+  background-color: #f8d7da;
+  color: #b02a37;
+  .cherry-panel--title {
+    background-color: #dc3545;
+    &.cherry-panel--title__not-empty::before {
+      content: '\EA68';
+    }
+  }
+}
+.cherry-panel__success {
+  background-color: #d1e7dd;
+  color: #146c43;
+  .cherry-panel--title {
+    background-color: #198754;
+    &.cherry-panel--title__not-empty::before {
+      content: '\EA67';
+    }
   }
 }

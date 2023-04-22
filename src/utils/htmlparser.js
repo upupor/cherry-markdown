@@ -57,7 +57,10 @@ const htmlParser = {
       const temObj = arr[i];
       if (temObj.type === 'tag') ret = this.$handleTagObject(temObj, ret);
       else if (temObj.type === 'text' && temObj.content.length > 0) {
-        ret += temObj.content.replace(/&nbsp;/g, ' ').replace(/[\n]+/g, '\n');
+        ret += temObj.content
+          .replace(/&nbsp;/g, ' ')
+          .replace(/[\n]+/g, '\n')
+          .replace(/^[ \t\n]+$/, '\n');
       }
     }
     return ret;
@@ -69,7 +72,7 @@ const htmlParser = {
    */
   $handleTagObject(temObj, returnString) {
     let ret = returnString;
-    if (temObj.attrs.class && temObj.attrs.class.indexOf('ch-icon') >= 0) {
+    if (temObj.attrs.class && /(ch-icon-square|ch-icon-check)/.test(temObj.attrs.class)) {
       // 针对checklist
       if (temObj.attrs.class.indexOf('ch-icon-check') >= 0) {
         ret += '[x]';
@@ -100,7 +103,8 @@ const htmlParser = {
     }
     if (obj.name === 'code' || obj.name === 'pre') {
       // 解析代码块 或 行内代码
-      return self.tagParser.codeParser(obj, self.$dealCodeTag(obj));
+      // pre时，强制转成代码块
+      return self.tagParser.codeParser(obj, self.$dealCodeTag(obj), obj.name === 'pre');
     }
     if (typeof self.tagParser[`${obj.name}Parser`] === 'function') {
       // 解析对应的具体标签
@@ -283,7 +287,7 @@ const htmlParser = {
      * @returns {string} str
      */
     pParser(obj, str) {
-      const $str = str.replace(/\t/g, '');
+      const $str = str;
       if (/\n$/.test($str)) {
         return $str;
       }
@@ -296,7 +300,7 @@ const htmlParser = {
      * @returns {string} str
      */
     divParser(obj, str) {
-      const $str = str.replace(/\t/g, '');
+      const $str = str;
       if (/\n$/.test($str)) {
         return $str;
       }
@@ -325,10 +329,11 @@ const htmlParser = {
      * 解析code标签
      * @param {HTMLElement} obj
      * @param {string} str 需要回填的字符串
+     * @param {boolean} isBlock 是否强制为代码块
      * @returns {string} str
      */
-    codeParser(obj, str) {
-      return this.formatEngine.convertCode(str);
+    codeParser(obj, str, isBlock = false) {
+      return this.formatEngine.convertCode(str, isBlock);
     },
     /**
      * 解析br标签
@@ -723,11 +728,11 @@ const htmlParser = {
     convertBr(str, attr) {
       return str + attr;
     },
-    convertCode(str) {
-      if (/\n/.test(str)) {
+    convertCode(str, isBlock = false) {
+      if (/\n/.test(str) || isBlock) {
         return `\`\`\`\n${str.replace(/\n+$/, '')}\n\`\`\``;
       }
-      return ` \`${str.replace(/`/g, '\\`')}\` `;
+      return `\`${str.replace(/`/g, '\\`')}\``;
     },
     convertB(str) {
       return /^\s*$/.test(str) ? '' : `**${str}**`;
@@ -738,9 +743,9 @@ const htmlParser = {
     convertU(str) {
       return /^\s*$/.test(str) ? '' : ` /${str}/ `;
     },
-    convertImg(str, attr) {
-      const $str = str && str.length > 0 ? $str : 'image';
-      return `![${$str}](${attr})`;
+    convertImg(alt, src) {
+      const $alt = alt && alt.length > 0 ? alt : 'image';
+      return `![${$alt}](${src})`;
     },
     convertGraph(str, attr, data, obj) {
       const $str = str && str.length > 0 ? str : 'graph';

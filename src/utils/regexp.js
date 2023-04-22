@@ -204,3 +204,52 @@ export function getListFromStr(selection, type) {
   }
   return $selection;
 }
+
+/**
+ * 信息面板的识别正则
+ * @returns {object}
+ */
+export function getPanelRule() {
+  const ret = {
+    begin: /(?:^|\n)(\n*(?:[^\S\n]*)):::([^:][^\n]+?)\s*\n/,
+    content: /([\w\W]*?)/,
+    end: /\n[ \t]*:::[ \t]*(?=$|\n+)/,
+  };
+  ret.reg = new RegExp(ret.begin.source + ret.content.source + ret.end.source, 'g');
+  return ret;
+}
+
+/**
+ * 手风琴/detail语法的识别正则
+ * 例：
+ * +++(-) 点击查看详情
+ * body
+ * body
+ * ++ 标题（默认收起内容）
+ * 内容
+ * ++- 标题（默认展开内容）
+ * 内容2
+ * +++
+ * @returns {object}
+ */
+export function getDetailRule() {
+  const ret = {
+    begin: /(?:^|\n)(\n*(?:[^\S\n]*))\+\+\+([-]{0,1})\s+([^\n]+)\n/,
+    content: /([\w\W]+?)/,
+    end: /\n[ \t]*\+\+\+[ \t]*(?=$|\n+)/,
+  };
+  ret.reg = new RegExp(ret.begin.source + ret.content.source + ret.end.source, 'g');
+  return ret;
+}
+
+// 匹配图片URL里的base64
+export const imgBase64Reg = /(!\[[^\n]*?\]\(data:image\/png;base64,)([^)]+)\)/g;
+
+// 匹配图片{}里的data-xml属性
+export const imgDrawioXmlReg = /(!\[[^\n]*?\]\([^)]+\)\{[^}]* data-xml=)([^}]+)\}/g;
+
+/**
+ * 匹配draw.io的图片语法
+ * 图片的语法为 ![alt](${base64}){data-type=drawio data-xml=${xml}}
+ */
+export const imgDrawioReg = /(!\[[^\n]*?\]\(data:image\/png;base64,[^)]+\)\{data-type=drawio data-xml=[^}]+\})/g;

@@ -96,6 +96,12 @@ const defaultConfig = {
       // 'hookName': {
       //
       // }
+      autoLink: {
+        /** 是否开启短链接 */
+        enableShortLink: true,
+        /** 短链接长度 */
+        shortLinkLength: 20,
+      },
       list: {
         listNested: false, // 同级列表类型转换后变为子级
         indentSpace: 2, // 默认2个空格缩进
@@ -213,6 +219,8 @@ const defaultConfig = {
       'ruby',
       '|',
       'list',
+      'panel',
+      'detail',
       {
         insert: [
           'image',
@@ -238,6 +246,9 @@ const defaultConfig = {
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color'], // array or false
     float: ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'quickTable', 'code'], // array or false
   },
+  // 打开draw.io编辑页的url，如果为空则drawio按钮失效
+  drawioIframeUrl: '',
+  // 上传文件的回调
   fileUpload: callbacks.fileUpload,
   /**
    * 上传文件的时候用来指定文件类型
@@ -248,6 +259,7 @@ const defaultConfig = {
     image: 'image/*',
     word: '.doc,.docx',
     pdf: '.pdf',
+    file: '*',
   },
   callback: {
     afterChange: callbacks.afterChange,

@@ -151,9 +151,13 @@ var basicConfig = {
       'color',
       'header',
       '|',
+      'drawIo',
+      '|',
       'ol',
       'ul',
       'checklist',
+      'panel',
+      'detail',
       '|',
       'formula',
       {
@@ -172,13 +176,14 @@ var basicConfig = {
       'theme'
     ],
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['mobilePreview', 'copy'],
+    sidebar: ['mobilePreview', 'copy', 'theme'],
     customMenu: {
       customMenuAName: customMenuA,
       customMenuBName: customMenuB,
       customMenuCName: customMenuC,
     },
   },
+  drawioIframeUrl: './drawio_demo.html',
   editor: {
     defaultModel: 'edit&preview',
   },

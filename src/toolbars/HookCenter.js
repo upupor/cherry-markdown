@@ -58,12 +58,16 @@ import Toc from './hooks/Toc';
 import LineTable from './hooks/LineTable';
 import BarTable from './hooks/BarTable';
 import Pdf from './hooks/Pdf';
+import File from './hooks/File';
 import Word from './hooks/Word';
 import Ruby from './hooks/Ruby';
 import Theme from './hooks/Theme';
 // Sidebar
 import MobilePreview from './hooks/MobilePreview';
 import Copy from './hooks/Copy';
+import Panel from './hooks/Panel';
+import Detail from './hooks/Detail';
+import DrawIo from './hooks/DrawIo';
 
 // 定义默认支持的工具栏
 // 目前不支持按需动态加载
@@ -116,6 +120,10 @@ const HookList = {
   word: Word,
   ruby: Ruby,
   theme: Theme,
+  file: File,
+  panel: Panel,
+  detail: Detail,
+  drawIo: DrawIo,
 };
 
 export default class HookCenter {

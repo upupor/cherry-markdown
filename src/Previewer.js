@@ -22,7 +22,7 @@ import Logger from './Logger';
 import Event from './Event';
 // import locale from './utils/locale';
 import { addEvent, removeEvent } from './utils/event';
-import { exportPDF, exportScreenShot } from './utils/export';
+import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile } from './utils/export';
 import PreviewerBubble from './toolbars/PreviewerBubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
@@ -381,7 +381,8 @@ export default class Previewer {
         this.editor.scrollToLineNum(0, 0, 1);
         return;
       }
-      if (domContainer.scrollTop + domContainer.offsetHeight > domContainer.scrollHeight) {
+      // 判定预览区域是否滚动到底部的逻辑，增加10px的冗余
+      if (domContainer.scrollTop + domContainer.offsetHeight + 10 > domContainer.scrollHeight) {
         this.editor.scrollToLineNum(null);
         return;
       }
@@ -495,11 +496,14 @@ export default class Previewer {
           continue;
         }
       }
-      if (/^(class|id|href|rel|target|src|title|controls|align|width|height|style)$/i.test(name)) {
+      if (/^(class|id|href|rel|target|src|title|controls|align|width|height|style|open)$/i.test(name)) {
         name = name === 'class' ? 'className' : name;
         if (name === 'style') {
           ret.style = ret.style ? ret.style : [];
           ret.style.push(value);
+        } else if (name === 'open') {
+          // 只要有open这个属性，就一定是true
+          ret[name] = true;
         } else {
           ret[name] = value;
         }
@@ -762,6 +766,10 @@ export default class Previewer {
 
   afterUpdate() {
     this.options.afterUpdateCallBack.map((fn) => fn());
+    if (this.highlightLineNum === undefined) {
+      this.highlightLineNum = 0;
+    }
+    this.highlightLine(this.highlightLineNum);
   }
 
   registerAfterUpdate(fn) {
@@ -822,6 +830,38 @@ export default class Previewer {
   }
 
   /**
+   * 高亮预览区域对应的行
+   * @param {Number} lineNum
+   */
+  highlightLine(lineNum) {
+    const domContainer = this.getDomContainer();
+    // 先取消所有行的高亮效果
+    domContainer.querySelectorAll('.cherry-highlight-line').forEach((element) => {
+      element.classList.remove('cherry-highlight-line');
+    });
+    // 只有双栏模式下才需要高亮光标对应的预览区域
+    if (this.$cherry?.status?.previewer !== 'show' || this.$cherry?.status?.editor !== 'show') {
+      return;
+    }
+    const doms = /** @type {NodeListOf<HTMLElement>}*/ (domContainer.querySelectorAll('[data-sign]'));
+    let lines = 0;
+    for (let index = 0; index < doms.length; index++) {
+      if (doms[index].parentNode !== domContainer) {
+        continue;
+      }
+      const blockLines = parseInt(doms[index].getAttribute('data-lines'), 10);
+      if (lines + blockLines < lineNum) {
+        lines += blockLines;
+        continue;
+      } else {
+        this.highlightLineNum = lineNum;
+        doms[index].classList.add('cherry-highlight-line');
+        return;
+      }
+    }
+  }
+
+  /**
    * 滚动到对应行号位置并加上偏移量
    * @param {Number} lineNum
    * @param {Number} offset
@@ -829,6 +869,7 @@ export default class Previewer {
   scrollToLineNumWithOffset(lineNum, offset) {
     const top = this.$getTopByLineNum(lineNum) - offset;
     this.$scrollAnimation(top);
+    this.highlightLine(lineNum);
   }
 
   /**
@@ -871,8 +912,12 @@ export default class Previewer {
   export(type = 'pdf') {
     if (type === 'pdf') {
       exportPDF(this.getDomContainer());
-    } else {
+    } else if (type === 'screenShot') {
       exportScreenShot(this.getDomContainer());
+    } else if (type === 'markdown') {
+      exportMarkdownFile(this.$cherry.getMarkdown());
+    } else if (type === 'html') {
+      exportHTMLFile(this.getValue());
     }
   }
 }
